@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Ticketing - Atención al Cliente</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">🎫 Ticketing Pro</div>
+        <nav id="nav-menu" class="nav-links">
+            <!-- Dinámico según auth -->
+        </nav>
+    </header>
+
+    <main class="container">
+        <!-- VISTA: AUTENTICACIÓN (LOGIN / REGISTER) -->
+        <section id="view-auth" class="view active">
+            <div class="auth-container">
+                <div class="auth-box">
+                    <h2>Iniciar Sesión</h2>
+                    <form id="form-login">
+                        <div class="form-group">
+                            <label>Correo Electrónico</label>
+                            <input type="email" id="login-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Ingresar</button>
+                    </form>
+                    <p class="switch-auth">¿No tienes cuenta? <a href="#" id="show-register">Regístrate aquí</a></p>
+                </div>
+
+                <div class="auth-box hidden" id="box-register">
+                    <h2>Registro de Usuario</h2>
+                    <form id="form-register">
+                        <div class="form-group">
+                            <label>Nombre de Usuario</label>
+                            <input type="text" id="reg-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Correo Electrónico</label>
+                            <input type="email" id="reg-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" id="reg-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Usuario</label>
+                            <select id="reg-role" required>
+                                <option value="client">Cliente</option>
+                                <option value="representative">Representante de Soporte</option>
+                            </select>
+                        </div>
+                        <div class="form-group hidden" id="group-rubro">
+                            <label>Rubro de Especialización</label>
+                            <select id="reg-rubro">
+                                <!-- Cargado dinámicamente -->
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success">Registrarse</button>
+                    </form>
+                    <p class="switch-auth">¿Ya tienes cuenta? <a href="#" id="show-login">Inicia sesión</a></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA: DASHBOARD / TICKETS -->
+        <section id="view-dashboard" class="view">
+            <div class="dashboard-header">
+                <h2>Panel de Tickets</h2>
+                <button class="btn btn-primary" id="btn-open-create-ticket">+ Nuevo Ticket</button>
+            </div>
+            
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="Abierto">Abiertos</button>
+                <button class="filter-btn" data-filter="En Progreso">En Progreso</button>
+                <button class="filter-btn" data-filter="Resuelto">Resueltos</button>
+                <button class="filter-btn" data-filter="Cerrado">Cerrados</button>
+            </div>
+
+            <div class="ticket-list" id="ticket-container">
+                <!-- Tarjetas de tickets -->
+            </div>
+        </section>
+
+        <!-- VISTA: DETALLE DE TICKET & HITOS -->
+        <section id="view-ticket-detail" class="view">
+            <button class="btn btn-secondary" id="btn-back-dashboard">← Volver al Panel</button>
+            <div class="ticket-detail-card" id="ticket-detail-content">
+                <!-- Detalle completo -->
+            </div>
+            <div class="hitos-section">
+                <h3>Hilo de Comunicación (Hitos)</h3>
+                <div class="hitos-list" id="hitos-container">
+                    <!-- Hitos -->
+                </div>
+                <form id="form-add-hito" class="hito-form">
+                    <textarea id="hito-mensaje" placeholder="Escribe tu mensaje o actualización..." required></textarea>
+                    <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- VISTA: GESTIÓN DE PRODUCTOS Y RUBROS -->
+        <section id="view-products" class="view">
+            <div class="dashboard-header">
+                <h2>Gestión de Productos y Rubros</h2>
+                <button class="btn btn-primary" id="btn-open-create-product">+ Registrar Producto</button>
+            </div>
+            
+            <div class="products-grid">
+                <div class="card">
+                    <h3>Rubros Disponibles</h3>
+                    <ul id="rubros-list"></ul>
+                </div>
+                <div class="card">
+                    <h3>Productos Registrados</h3>
+                    <div id="products-list"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL: CREAR TICKET -->
+    <div class="modal" id="modal-ticket">
+        <div class="modal-content">
+            <span class="close" id="close-modal-ticket">&times;</span>
+            <h2>Crear Nuevo Ticket</h2>
+            <form id="form-create-ticket">
+                <div class="form-group" id="client-select-group">
+                    <label>Cliente</label>
+                    <select id="ticket-client-id"></select>
+                </div>
+                <div class="form-group">
+                    <label>Producto (Seleccione el equipo o aparato)</label>
+                    <select id="ticket-product-id" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Asunto / Motivo del Contacto</label>
+                    <input type="text" id="ticket-asunto" required placeholder="Ej. No enciende la heladera">
+                </div>
+                <div class="form-group">
+                    <label>Mensaje Inicial / Descripción</label>
+                    <textarea id="ticket-mensaje" required placeholder="Detalle el problema..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Crear Ticket</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CREAR PRODUCTO -->
+    <div class="modal" id="modal-product">
+        <div class="modal-content">
+            <span class="close" id="close-modal-product">&times;</span>
+            <h2>Registrar Producto</h2>
+            <form id="form-create-product">
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="prod-nombre" required placeholder="Ej. Heladera No Frost">
+                </div>
+                <div class="form-group">
+                    <label>Marca</label>
+                    <input type="text" id="prod-marca" required placeholder="Ej. Samsung">
+                </div>
+                <div class="form-group">
+                    <label>Modelo</label>
+                    <input type="text" id="prod-modelo" required placeholder="Ej. RT38">
+                </div>
+                <div class="form-group">
+                    <label>Número de Serie</label>
+                    <input type="text" id="prod-serie" required placeholder="Ej. SN987654321">
+                </div>
+                <div class="form-group">
+                    <label>Código Interno</label>
+                    <input type="text" id="prod-codigo" required placeholder="Ej. LB-HEL-01">
+                </div>
+                <div class="form-group">
+                    <label>Rubro</label>
+                    <select id="prod-rubro-id" required></select>
+                </div>
+                <button type="submit" class="btn btn-success">Guardar Producto</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
